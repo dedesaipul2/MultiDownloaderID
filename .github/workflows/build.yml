@@ -22,24 +22,37 @@ jobs:
             openjdk-17-jdk autoconf libtool pkg-config \
             zlib1g-dev libncurses6 libncursesw6
 
-      - name: Install Buildozer & Tools
+      - name: Install Buildozer
         run: |
-          pip install --upgrade pip wheel setuptools
-          pip install cython buildozer virtualenv
+          pip install --upgrade pip wheel setuptools cython
+          pip install buildozer
 
-      - name: Ensure buildozer.spec exists
+      - name: Prepare Android SDK (Fix License & Build-tools)
         run: |
-          if [ ! -f buildozer.spec ]; then
-            echo "❌ Error: buildozer.spec tidak ditemukan!"
-            exit 1
-          fi
+          mkdir -p $HOME/.buildozer/android/sdk
+          cd $HOME/.buildozer/android/sdk
+          
+          # Download commandline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O clt.zip
+          unzip clt.zip -d cmdline-tools
+          mkdir -p cmdline-tools/latest
+          mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
 
-      - name: Build APK with Buildozer
+          export ANDROID_HOME=$HOME/.buildozer/android/sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+
+          yes | sdkmanager --licenses
+
+          sdkmanager "platform-tools" \
+                     "platforms;android-34" \
+                     "build-tools;34.0.0"
+
+      - name: Build APK
         run: |
           buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MultiDownloaderID
+          name: APK-Build
           path: bin/*.apk
