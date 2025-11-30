@@ -8,10 +8,9 @@ MainApp:
 
     FloatLayout:
 
-        # ------------------ Banner Gradient ------------------
         Canvas:
             Color:
-                rgba: (1, 0, 0, 1)  # merah
+                rgba: (1, 0, 0, 1)
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -19,7 +18,7 @@ MainApp:
         BoxLayout:
             orientation: "vertical"
             size_hint_y: None
-            height: dp(200)
+            height: dp(180)
 
             canvas.before:
                 Color:
@@ -27,11 +26,6 @@ MainApp:
                 Rectangle:
                     pos: self.pos
                     size: self.size
-                Color:
-                    rgba: (0.1, 0.1, 0.1, 1)
-                Rectangle:
-                    pos: self.x, self.y
-                    size: self.width, dp(40)
 
             Label:
                 text: "Multi Downloader ID"
@@ -39,7 +33,6 @@ MainApp:
                 bold: True
                 color: 1,1,1,1
 
-        # ------------------ CARD MENU ------------------
         GridLayout:
             cols: 2
             spacing: dp(15)
@@ -47,7 +40,6 @@ MainApp:
             pos_hint: {"center_y": 0.35}
             size_hint_y: 0.55
 
-            # YOUTUBE
             Button:
                 text: "YouTube"
                 font_size: "20sp"
@@ -56,7 +48,6 @@ MainApp:
                 background_color: 0.9, 0, 0, 1
                 on_release: app.root.current = "downloader"
 
-            # TIKTOK
             Button:
                 text: "TikTok"
                 font_size: "20sp"
@@ -65,7 +56,6 @@ MainApp:
                 background_color: 0, 0, 0, 1
                 on_release: app.root.current = "downloader"
 
-            # INSTAGRAM
             Button:
                 text: "Instagram"
                 font_size: "20sp"
@@ -74,7 +64,6 @@ MainApp:
                 background_color: 0.8, 0, 0.3, 1
                 on_release: app.root.current = "downloader"
 
-            # FACEBOOK
             Button:
                 text: "Facebook"
                 font_size: "20sp"
@@ -83,7 +72,6 @@ MainApp:
                 background_color: 0.2, 0.2, 1, 1
                 on_release: app.root.current = "downloader"
 
-        # ------------------ NAVIGATION BAR ------------------
         BoxLayout:
             orientation: "horizontal"
             size_hint_y: None
@@ -102,7 +90,6 @@ MainApp:
             Button:
                 text: "Settings"
                 on_release: app.root.current = "settings"
-
 
 
 <DownloaderPage>:
@@ -127,6 +114,26 @@ MainApp:
             background_color: 0.1,0.1,0.1,1
             foreground_color: 1,1,1,1
 
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: dp(50)
+            spacing: dp(10)
+
+            Label:
+                text: "Format:"
+                font_size: "18sp"
+                color: 1,1,1,1
+                size_hint_x: 0.3
+
+            Spinner:
+                id: mode_spinner
+                text: "MP4"
+                values: ["MP4", "MP3"]
+                size_hint_x: 0.7
+                background_color: 0.2,0.2,0.2,1
+                color: 1,1,1,1
+
         Button:
             text: "Download"
             size_hint_y: None
@@ -136,7 +143,6 @@ MainApp:
 
         Widget:
 
-        # NAVBAR
         BoxLayout:
             size_hint_y: None
             height: dp(60)
@@ -153,7 +159,6 @@ MainApp:
             Button:
                 text: "Settings"
                 on_release: app.root.current = "settings"
-
 
 
 <ToolsPage>:
@@ -194,7 +199,6 @@ MainApp:
             Button:
                 text: "Settings"
                 on_release: app.root.current = "settings"
-
 
 
 <SettingsPage>:

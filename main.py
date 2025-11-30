@@ -6,22 +6,19 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
-from kivy.core.window import Window
-from kivy.utils import platform
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
 # ------------------------------------------------------------
-# Folder Penyimpanan (Download Folder Android)
+# Folder Penyimpanan (Android Download folder)
 # ------------------------------------------------------------
-
 DOWNLOAD_DIR = "/storage/emulated/0/Download/"
 
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 # ------------------------------------------------------------
-# Popup Notifikasi Sederhana
+# Popup Notifikasi
 # ------------------------------------------------------------
 def show_popup(message):
     popup = Popup(
@@ -44,14 +41,15 @@ class DownloaderPage(Screen):
 
     def start_download(self):
         url = self.ids.url_input.text.strip()
+        mode = self.ids.mode_spinner.text  # MP4 atau MP3
 
         if url == "":
             show_popup("Masukkan URL terlebih dahulu!")
             return
 
-        # Deteksi platform otomatis
+        # Deteksi platform
         if "youtube.com" in url or "youtu.be" in url:
-            threading.Thread(target=self.youtube_download, args=(url,)).start()
+            threading.Thread(target=self.youtube_download, args=(url, mode)).start()
 
         elif "tiktok.com" in url:
             threading.Thread(target=self.tiktok_download, args=(url,)).start()
@@ -63,23 +61,32 @@ class DownloaderPage(Screen):
             threading.Thread(target=self.facebook_download, args=(url,)).start()
 
         else:
-            show_popup("Platform tidak dikenali!")
+            show_popup("Platform tidak didukung!")
             return
 
     # --------------------------------------------------------
-    # YouTube Downloader
+    # YouTube Downloader (MP4 / MP3)
     # --------------------------------------------------------
-    def youtube_download(self, url):
+    def youtube_download(self, url, mode):
         try:
-            ydl_opts = {
-                'outtmpl': DOWNLOAD_DIR + '%(title)s.%(ext)s',
-                'format': 'best'
-            }
+            if mode == "MP3":
+                ydl_opts = {
+                    'format': 'bestaudio/best',
+                    'outtmpl': DOWNLOAD_DIR + '%(title)s.mp3',
+                    'postprocessors': [
+                        {'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3'}
+                    ]
+                }
+            else:  # MP4
+                ydl_opts = {
+                    'format': 'bestvideo+bestaudio/best',
+                    'outtmpl': DOWNLOAD_DIR + '%(title)s.%(ext)s'
+                }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
 
-            Clock.schedule_once(lambda dt: show_popup("Download YouTube selesai!"), 0)
+            Clock.schedule_once(lambda dt: show_popup(f"YouTube {mode} selesai!"), 0)
 
         except Exception as e:
             Clock.schedule_once(lambda dt: show_popup(f"Error YouTube: {str(e)}"), 0)
@@ -93,9 +100,9 @@ class DownloaderPage(Screen):
             r = requests.get(api).json()
 
             dl_link = "https://tikmate.app/download/" + r["token"] + "/" + r["id"] + ".mp4"
-            file_path = DOWNLOAD_DIR + "tiktok_video.mp4"
+            fname = DOWNLOAD_DIR + "tiktok_video.mp4"
 
-            open(file_path, "wb").write(requests.get(dl_link).content)
+            open(fname, "wb").write(requests.get(dl_link).content)
 
             Clock.schedule_once(lambda dt: show_popup("Download TikTok selesai!"), 0)
 
@@ -142,7 +149,7 @@ class DownloaderPage(Screen):
 
 
 # ------------------------------------------------------------
-# Halaman Tools
+# Tools
 # ------------------------------------------------------------
 class ToolsPage(Screen):
 
@@ -169,16 +176,12 @@ class MainApp(ScreenManager):
 
 
 # ------------------------------------------------------------
-# Main App Loader
+# App
 # ------------------------------------------------------------
 class MultiDownloaderID(App):
-
     def build(self):
         return Builder.load_file("multi.kv")
 
 
-# ------------------------------------------------------------
-# Start App
-# ------------------------------------------------------------
 if __name__ == "__main__":
     MultiDownloaderID().run()
