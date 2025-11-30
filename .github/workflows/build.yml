@@ -11,33 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3 python3-pip git zip unzip \
-            openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev \
-            libncurses5 libstdc++6
+          sudo apt install -y \
+            python3 python3-pip git zip unzip \
+            openjdk-17-jdk autoconf libtool pkg-config \
+            zlib1g-dev libncurses5 libstdc++6
 
-      - name: Install Buildozer
+      - name: Install Buildozer & Tools
         run: |
-          pip install --upgrade pip setuptools wheel
+          pip install --upgrade pip wheel setuptools
           pip install buildozer cython virtualenv
 
-      - name: Create .buildozer folder if missing
+      - name: Ensure buildozer.spec exists
         run: |
           if [ ! -f buildozer.spec ]; then
-            buildozer init
+            echo "Error: buildozer.spec tidak ditemukan!"
+            exit 1
           fi
 
-      - name: Build APK
+      - name: Build APK with Buildozer
         run: |
           buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Kivy-APK
+          name: MultiDownloaderID
           path: bin/*.apk
