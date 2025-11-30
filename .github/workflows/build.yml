@@ -1,7 +1,9 @@
-
 name: Build APK
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -9,60 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # ========== PYTHON ==========
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          python-version: "3.10"
+          java-version: "17"
+          distribution: "temurin"
 
-      - name: Install Buildozer Dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            python3-pip python3-setuptools python3-wheel \
-            git zip unzip openjdk-17-jdk libffi-dev libssl-dev \
-            autoconf automake build-essential libtool pkg-config
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
 
-      # ========== ANDROID SDK ==========
-      - name: Install Android SDK & Build Tools
-        run: |
-          sudo mkdir -p /usr/lib/android-sdk/cmdline-tools
-          sudo mkdir -p /usr/lib/android-sdk/cmdline-tools/latest
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-          cd /usr/lib/android-sdk/cmdline-tools/latest
-          sudo wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          sudo unzip commandlinetools-linux-9477386_latest.zip
-          sudo rm commandlinetools-linux-9477386_latest.zip
-
-          export ANDROID_HOME=/usr/lib/android-sdk
-          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-
-          yes | sdkmanager --licenses
-          yes | sdkmanager "platform-tools"
-          yes | sdkmanager "platforms;android-33"
-          yes | sdkmanager "build-tools;33.0.2"   # <--- FIX AIDL
-          yes | sdkmanager "ndk;23.1.7779620"
-
-      # ========== BUILDOZER ==========
-      - name: Install Buildozer & Cython
-        run: |
-          pip install --upgrade pip
-          pip install buildozer cython==0.29.33
-
-      # ========== BUILD APK ==========
       - name: Build APK
-        env:
-          ANDROIDSDK: /usr/lib/android-sdk
-          ANDROIDNDK: /usr/lib/android-sdk/ndk/23.1.7779620
-        run: |
-          buildozer android release
+        run: ./gradlew assembleRelease
 
-      # ========== UPLOAD ARTIFACT ==========
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: MultiDownloaderID-APK
-          path: bin/*.apk
+          name: app-release
+          path: app/build/outputs/apk/release/*.apk
