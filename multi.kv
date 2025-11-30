@@ -1,0 +1,235 @@
+#:import dp kivy.metrics.dp
+#:import rgba kivy.utils.get_color_from_hex
+
+MainApp:
+
+<HomePage>:
+    name: "home"
+
+    FloatLayout:
+
+        # ------------------ Banner Gradient ------------------
+        Canvas:
+            Color:
+                rgba: (1, 0, 0, 1)  # merah
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: "vertical"
+            size_hint_y: None
+            height: dp(200)
+
+            canvas.before:
+                Color:
+                    rgba: (1, 0, 0, 1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+                Color:
+                    rgba: (0.1, 0.1, 0.1, 1)
+                Rectangle:
+                    pos: self.x, self.y
+                    size: self.width, dp(40)
+
+            Label:
+                text: "Multi Downloader ID"
+                font_size: "28sp"
+                bold: True
+                color: 1,1,1,1
+
+        # ------------------ CARD MENU ------------------
+        GridLayout:
+            cols: 2
+            spacing: dp(15)
+            padding: dp(20)
+            pos_hint: {"center_y": 0.35}
+            size_hint_y: 0.55
+
+            # YOUTUBE
+            Button:
+                text: "YouTube"
+                font_size: "20sp"
+                bold: True
+                background_normal: ""
+                background_color: 0.9, 0, 0, 1
+                on_release: app.root.current = "downloader"
+
+            # TIKTOK
+            Button:
+                text: "TikTok"
+                font_size: "20sp"
+                bold: True
+                background_normal: ""
+                background_color: 0, 0, 0, 1
+                on_release: app.root.current = "downloader"
+
+            # INSTAGRAM
+            Button:
+                text: "Instagram"
+                font_size: "20sp"
+                bold: True
+                background_normal: ""
+                background_color: 0.8, 0, 0.3, 1
+                on_release: app.root.current = "downloader"
+
+            # FACEBOOK
+            Button:
+                text: "Facebook"
+                font_size: "20sp"
+                bold: True
+                background_normal: ""
+                background_color: 0.2, 0.2, 1, 1
+                on_release: app.root.current = "downloader"
+
+        # ------------------ NAVIGATION BAR ------------------
+        BoxLayout:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: dp(60)
+            pos_hint: {"y": 0}
+
+            Button:
+                text: "Home"
+                on_release: app.root.current = "home"
+            Button:
+                text: "Downloader"
+                on_release: app.root.current = "downloader"
+            Button:
+                text: "Tools"
+                on_release: app.root.current = "tools"
+            Button:
+                text: "Settings"
+                on_release: app.root.current = "settings"
+
+
+
+<DownloaderPage>:
+    name: "downloader"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        Label:
+            text: "Downloader"
+            font_size: "28sp"
+            bold: True
+            color: 1,1,1,1
+
+        TextInput:
+            id: url_input
+            hint_text: "Masukkan URL..."
+            size_hint_y: None
+            height: dp(50)
+            background_color: 0.1,0.1,0.1,1
+            foreground_color: 1,1,1,1
+
+        Button:
+            text: "Download"
+            size_hint_y: None
+            height: dp(50)
+            background_color: 1,0,0,1
+            on_release: root.start_download()
+
+        Widget:
+
+        # NAVBAR
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+
+            Button:
+                text: "Home"
+                on_release: app.root.current = "home"
+            Button:
+                text: "Downloader"
+                on_release: app.root.current = "downloader"
+            Button:
+                text: "Tools"
+                on_release: app.root.current = "tools"
+            Button:
+                text: "Settings"
+                on_release: app.root.current = "settings"
+
+
+
+<ToolsPage>:
+    name: "tools"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        Label:
+            text: "Tools Network"
+            font_size: "28sp"
+            bold: True
+            color: 1,1,1,1
+
+        Button:
+            text: "Cek IP Publik"
+            size_hint_y: None
+            height: dp(50)
+            on_release: root.check_ip()
+
+        Widget:
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+
+            Button:
+                text: "Home"
+                on_release: app.root.current = "home"
+            Button:
+                text: "Downloader"
+                on_release: app.root.current = "downloader"
+            Button:
+                text: "Tools"
+                on_release: app.root.current = "tools"
+            Button:
+                text: "Settings"
+                on_release: app.root.current = "settings"
+
+
+
+<SettingsPage>:
+    name: "settings"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+
+        Label:
+            text: "Settings"
+            font_size: "28sp"
+            bold: True
+            color: 1,1,1,1
+
+        Label:
+            text: "Versi: 1.0\nDeveloper: Kamu"
+            color: 1,1,1,1
+
+        Widget:
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+
+            Button:
+                text: "Home"
+                on_release: app.root.current = "home"
+            Button:
+                text: "Downloader"
+                on_release: app.root.current = "downloader"
+            Button:
+                text: "Tools"
+                on_release: app.root.current = "tools"
+            Button:
+                text: "Settings"
+                on_release: app.root.current = "settings"
