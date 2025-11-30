@@ -18,20 +18,23 @@ jobs:
 
       - name: Install Buildozer
         run: |
-          pip install --upgrade pip setuptools wheel cython
-          pip install buildozer
+          pip install --user --upgrade pip setuptools wheel cython
+          pip install --user buildozer
 
-      - name: Setup Android SDK (FIXED)
+      - name: Fix PATH for Buildozer
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "PATH fixed: $HOME/.local/bin"
+
+      - name: Setup Android SDK
         env:
           ANDROID_HOME: ${{ github.workspace }}/android-sdk
         run: |
           mkdir -p $ANDROID_HOME/cmdline-tools
 
-          # Download Commandline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
           unzip tools.zip -d $ANDROID_HOME/cmdline-tools
 
-          # Must rename to "latest" for sdkmanager to work
           mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
 
           export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
@@ -42,10 +45,10 @@ jobs:
                      "platforms;android-34" \
                      "build-tools;34.0.0"
 
-      - name: Build APK using Buildozer
+      - name: Build APK
         env:
           ANDROID_HOME: ${{ github.workspace }}/android-sdk
-          PATH: ${{ github.workspace }}/android-sdk/platform-tools:${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/.local/bin:/usr/bin:/bin
+          PATH: ${{ github.workspace }}/android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/android-sdk/platform-tools:$HOME/.local/bin:${{ env.PATH }}
         run: |
           buildozer -v android debug
 
