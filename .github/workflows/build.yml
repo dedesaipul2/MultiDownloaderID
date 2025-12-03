@@ -2,51 +2,78 @@ name: Build Kivy APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+
     steps:
     - name: Checkout Repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Install Git
-      run: sudo apt-get update && sudo apt-get install -y git
+    - name: Enable universe repo
+      run: |
+        sudo add-apt-repository -y universe
+        sudo apt-get update
 
-    - name: Install Dependencies
+    - name: Install System Dependencies (FIXED)
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          python3-pip \
-          python3-setuptools \
-          python3-wheel \
-          build-essential \
+        sudo apt-get install -y --no-install-recommends \
           git \
+          zip unzip \
+          wget curl \
+          build-essential \
           openjdk-17-jdk \
-          unzip \
-          pkg-config \
-          zlib1g-dev \
-          libncurses5 \
-          libstdc++6 \
-          libffi-dev \
-          libopenssl-dev \
+          python3-pip python3-setuptools python3-wheel \
+          pkg-config zlib1g-dev libffi-dev libssl-dev \
           libgl1-mesa-dev \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          autoconf \
-          libtool \
-          cmake
+          libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+          autoconf libtool cmake \
+          libncurses5-dev
 
-        pip install Cython
-        pip install buildozer
+    - name: Install Python Tools
+      run: |
+        python3 -m pip install --upgrade pip wheel setuptools
+        python3 -m pip install --upgrade Cython
+        python3 -m pip install --user buildozer
+
+    - name: Add pip user bin to PATH
+      run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install Android SDK Tools
+      run: |
+        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+        cd "$ANDROID_SDK_ROOT"
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O tools.zip
+        unzip -q tools.zip -d cmdline-tools
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
+        rm tools.zip
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        yes | sdkmanager --licenses
+
+    - name: Install Android Components
+      run: |
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+        sdkmanager \
+          "platform-tools" \
+          "platforms;android-33" \
+          "build-tools;33.0.2" \
+          "ndk;23.1.7779620"
 
     - name: Build APK
+      env:
+        PATH: $HOME/.local/bin:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+        JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
       run: |
+        buildozer --version
         buildozer android debug
 
     - name: Upload APK
